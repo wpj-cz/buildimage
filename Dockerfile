@@ -31,12 +31,3 @@ RUN apt-get update \
    # Cleanup
    && apt-get remove --purge -y libicu-dev libxml2-dev libbz2-dev libmcrypt-dev zlib1g-dev libc-client-dev libkrb5-dev git libmagickwand-dev ruby-dev automake libtool \
    && rm -rf /var/lib/apt/lists/*
-
-# Install git, composer, nodejs
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer && composer self-update 1.8.6 \
-   && curl -sL https://deb.nodesource.com/setup_10.x | bash - && apt install -y nodejs \
-   && apt install -y git
-
-# Install docker binaries
-RUN cd /var/ && wget -qO- https://download.docker.com/linux/static/stable/x86_64/docker-19.03.5.tgz | tar xzvf - && cp docker/* /usr/bin/
-RUN dockerd &
