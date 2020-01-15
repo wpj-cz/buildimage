@@ -20,7 +20,7 @@ RUN apt-get update \
    && apt install -y --no-install-recommends git \
    && git clone --recursive https://github.com/absalomedia/sassphp.git /tmp/sassphp -b 0.6.1 \
    && cd /tmp/sassphp \
-   && cd lib/libsass && make -j1 && cd ../.. \
+   && cd lib/libsass && sed -i 's/-j 0//' Makefile && make -j1 && cd ../.. \
    && docker-php-ext-configure /tmp/sassphp \
    && docker-php-ext-install /tmp/sassphp \
    && rm -r /tmp/sassphp \
