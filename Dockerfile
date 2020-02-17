@@ -225,17 +225,18 @@ RUN set -eux; \
 	\
 	# UWSGI
 	set -eux; \
+	export UWSGI_VERSION=master; \
    cd /usr/src; \
-   curl -fsSL -o uwsgi.zip https://github.com/unbit/uwsgi/archive/2.0.17.1.zip; \
+   curl -fsSL -o uwsgi.zip https://github.com/unbit/uwsgi/archive/${UWSGI_VERSION}.zip; \
    unzip uwsgi.zip; \
-   cd uwsgi-2.0.17.1; \
+   cd uwsgi-${UWSGI_VERSION}; \
    python uwsgiconfig.py --build core; \
    python uwsgiconfig.py --plugin plugins/corerouter core; \
    python uwsgiconfig.py --plugin plugins/http core; \
    UWSGICONFIG_PHPDIR=/usr/local python uwsgiconfig.py --plugin plugins/php core php ; \
    mkdir /usr/local/uwsgi; \
    mv uwsgi *_plugin.so /usr/local/uwsgi; \
-   rm -rf /usr/src/uwsgi-2.0.17.1
+   rm -rf /usr/src/uwsgi-${UWSGI_VERSION}; \
    # UWSGI end
    \
    cd /usr/src/php; \
