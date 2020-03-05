@@ -233,6 +233,7 @@ RUN set -eux; \
    python uwsgiconfig.py --build core; \
    python uwsgiconfig.py --plugin plugins/corerouter core; \
    python uwsgiconfig.py --plugin plugins/http core; \
+   python uwsgiconfig.py --plugin plugins/cheaper_busyness core; \
    UWSGICONFIG_PHPDIR=/usr/local python uwsgiconfig.py --plugin plugins/php core php ; \
    mkdir /usr/local/uwsgi; \
    mv uwsgi *_plugin.so /usr/local/uwsgi; \
