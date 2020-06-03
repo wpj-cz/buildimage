@@ -311,7 +311,7 @@ RUN apt-get update \
    && rm -r /tmp/sassphp \
    \
    # Additional apps
-   && apt install -y --no-install-recommends nano wget ghostscript less \
+   && apt install -y --no-install-recommends nano wget ghostscript less unzip \
    \
    # Cleanup
    && apt-get remove --purge -y libicu-dev libxml2-dev libbz2-dev libmcrypt-dev zlib1g-dev libc-client-dev libkrb5-dev git libmagickwand-dev ruby-dev automake libtool \
