@@ -293,7 +293,7 @@ RUN apt-get update \
    && docker-php-ext-install pdo_mysql intl mbstring soap bz2 mcrypt xmlrpc zip bcmath imap gd xsl calendar opcache \
    \
    # PECL
-   && apt install -y --no-install-recommends libmemcached-dev rabbitmq-c rabbitmq-c-dev \
+   && apt install -y --no-install-recommends libmemcached-dev librabbitmq-dev \
    && pecl install memcached imagick apcu amqp \
    && docker-php-ext-enable memcached imagick apcu amqp \
    \
