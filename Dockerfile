@@ -8,9 +8,9 @@ RUN apt-get update \
    && docker-php-ext-install pdo_mysql intl mbstring soap bz2 mcrypt xmlrpc zip bcmath imap gd xsl calendar opcache \
    \
    # PECL
-   && apt install -y --no-install-recommends libmemcached-dev \
-   && pecl install memcached imagick apcu \
-   && docker-php-ext-enable memcached imagick apcu \
+   && apt install -y --no-install-recommends libmemcached-dev librabbitmq-dev \
+   && pecl install memcached imagick apcu amqp \
+   && docker-php-ext-enable memcached imagick apcu amqp \
    \
    # Fontcustom - font icons \
    && apt install -y --no-install-recommends ruby ruby-dev fontforge woff-tools automake libtool \
