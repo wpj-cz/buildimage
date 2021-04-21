@@ -2,7 +2,7 @@ FROM php:7.3-apache-stretch
 
 RUN apt-get update \
    # Core PHP modules \
-   && apt install -y --no-install-recommends libicu-dev libxml2-dev libjpeg62-turbo-dev libbz2-dev libmcrypt-dev zlib1g-dev libc-client-dev libkrb5-dev libmagickwand-dev libxslt-dev mysql-client \
+   && apt install -y --no-install-recommends libicu-dev libxml2-dev libjpeg62-turbo-dev libbz2-dev zlib1g-dev libc-client-dev libkrb5-dev libmagickwand-dev libxslt-dev libzip-dev mysql-client \
    && docker-php-ext-configure imap --with-kerberos --with-imap-ssl \
    && docker-php-ext-configure gd --with-jpeg-dir=/usr --with-png-dir=/usr \
    && docker-php-ext-install pdo_mysql intl mbstring soap bz2 xmlrpc zip bcmath imap gd xsl calendar opcache \
@@ -29,5 +29,5 @@ RUN apt-get update \
    && apt install -y --no-install-recommends nano wget ghostscript less \
    \
    # Cleanup
-   && apt-get remove --purge -y libicu-dev libxml2-dev libbz2-dev libmcrypt-dev zlib1g-dev libc-client-dev libkrb5-dev git libmagickwand-dev ruby-dev automake libtool \
+   && apt-get remove --purge -y libicu-dev libxml2-dev libbz2-dev libzip-dev zlib1g-dev libc-client-dev libkrb5-dev git libmagickwand-dev ruby-dev automake libtool \
    && rm -rf /var/lib/apt/lists/*
