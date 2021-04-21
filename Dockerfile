@@ -4,6 +4,9 @@ WORKDIR /var/www/html
 
 EXPOSE 80
 
+# use TLSv1.0
+RUN sed -i 's/MinProtocol = TLSv1.2/MinProtocol = TLSv1.0/g' /etc/ssl/openssl.cnf
+
 # UWSGI
 RUN set -eux; \
    savedAptMark="$(apt-mark showmanual)"; \
