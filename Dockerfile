@@ -1,5 +1,9 @@
 FROM php:7.3-cli
 
+WORKDIR /var/www/html
+
+EXPOSE 80
+
 # UWSGI
 RUN set -eux; \
    savedAptMark="$(apt-mark showmanual)"; \
