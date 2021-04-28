@@ -7,6 +7,8 @@ EXPOSE 80
 # use TLSv1.0
 RUN sed -i 's/MinProtocol = TLSv1.2/MinProtocol = TLSv1.0/g' /etc/ssl/openssl.cnf
 
+COPY imagick.xml /var/www/.config/ImageMagick/policy.xml
+
 # UWSGI
 RUN set -eux; \
    savedAptMark="$(apt-mark showmanual)"; \
