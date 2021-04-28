@@ -1,5 +1,7 @@
 FROM php:7.3-apache-stretch
 
+COPY imagick.xml /var/www/.config/ImageMagick/policy.xml
+
 RUN apt-get update \
    # Core PHP modules \
    && apt install -y --no-install-recommends libicu-dev libxml2-dev libjpeg62-turbo-dev libbz2-dev zlib1g-dev libc-client-dev libkrb5-dev libmagickwand-dev libxslt-dev libzip-dev mysql-client \
