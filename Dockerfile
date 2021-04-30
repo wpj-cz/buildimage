@@ -1,6 +1,7 @@
 FROM php:7.3-apache-stretch
 
 COPY imagick.xml /var/www/.config/ImageMagick/policy.xml
+COPY imagick.xml /root/.config/ImageMagick/policy.xml
 
 RUN apt-get update \
    # Core PHP modules \
