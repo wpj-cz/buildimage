@@ -8,6 +8,7 @@ EXPOSE 80
 RUN sed -i 's/MinProtocol = TLSv1.2/MinProtocol = TLSv1.0/g' /etc/ssl/openssl.cnf
 
 COPY imagick.xml /var/www/.config/ImageMagick/policy.xml
+COPY imagick.xml /root/.config/ImageMagick/policy.xml
 
 # UWSGI
 RUN set -eux; \
