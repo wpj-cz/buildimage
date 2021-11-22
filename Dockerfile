@@ -25,6 +25,7 @@ RUN set -eux; \
       libxml2-dev \
       zlib1g-dev \
       libpcre3-dev \
+      libreadline-dev \
    ;\
    export UWSGI_VERSION=2.0.19.1; \
    cd /usr/src; \
