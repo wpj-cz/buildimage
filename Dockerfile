@@ -1,4 +1,4 @@
-FROM php:7.3-cli-buster
+FROM php:7.3-cli-bullseye
 
 WORKDIR /var/www/html
 
