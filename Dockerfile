@@ -75,7 +75,7 @@ RUN apt-get update \
    && rm -r /tmp/sassphp \
    \
    # Additional apps
-   && apt install -y --no-install-recommends nano wget ghostscript less unzip \
+   && apt install -y --no-install-recommends nano wget ghostscript less unzip python3-pip \
    \
    # Cleanup
    && apt-get remove --purge -y libicu-dev libxml2-dev libbz2-dev zlib1g-dev libc-client-dev libkrb5-dev git libmagickwand-dev ruby-dev automake libtool \
