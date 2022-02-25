@@ -43,6 +43,7 @@ RUN set -eux; \
    mkdir /usr/local/uwsgi; \
    mv uwsgi *_plugin.so /usr/local/uwsgi; \
    rm -rf /usr/src/uwsgi-${UWSGI_VERSION}; \
+   cd /usr/src; \
    # UWSGI end
    \
    apt-mark auto '.*' > /dev/null; \
