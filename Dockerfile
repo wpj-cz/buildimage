@@ -73,6 +73,7 @@ RUN apt-get update \
    && cd lib/libsass && sed -i 's/-j 0//' Makefile && make -j1 && cd ../.. \
    && docker-php-ext-configure /tmp/sassphp \
    && docker-php-ext-install /tmp/sassphp \
+   && cd .. \
    && rm -r /tmp/sassphp \
    \
    # Additional apps
