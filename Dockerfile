@@ -77,7 +77,7 @@ RUN apt-get update \
    && rm -r /tmp/sassphp \
    \
    # Additional apps
-   && apt install -y --no-install-recommends nano wget ghostscript less unzip python3-pip python3-setuptools \
+   && apt install -y --no-install-recommends nano wget ghostscript less unzip python3-pip \
    # Install xlsx-streaming python library
    && pip install xlsx-streaming \
    \
