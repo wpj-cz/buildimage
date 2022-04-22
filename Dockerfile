@@ -55,12 +55,12 @@ RUN apt-get update \
    && apt install -y --no-install-recommends libicu-dev libxml2-dev libjpeg62-turbo-dev libbz2-dev zlib1g-dev libc-client-dev libkrb5-dev libmagickwand-dev libxslt-dev libzip-dev mariadb-client \
    && docker-php-ext-configure imap --with-kerberos --with-imap-ssl \
    && docker-php-ext-configure gd --with-jpeg-dir=/usr --with-png-dir=/usr \
-   && docker-php-ext-install pdo_mysql intl mbstring soap bz2 xmlrpc zip bcmath imap gd xsl calendar opcache gettext \
+   && docker-php-ext-install pdo_mysql intl mbstring soap bz2 xmlrpc zip bcmath imap gd xsl calendar opcache gettext sockets \
    \
    # PECL
    && apt install -y --no-install-recommends libmemcached-dev librabbitmq-dev \
    && pecl install memcached imagick apcu amqp \
-   && docker-php-ext-enable memcached imagick apcu amqp \
+   && docker-php-ext-enable memcached imagick apcu amqp sockets \
    \
    # Fontcustom - font icons \
    && apt install -y --no-install-recommends ruby ruby-dev fontforge woff-tools automake libtool \
