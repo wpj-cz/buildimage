@@ -63,8 +63,8 @@ RUN apt-get update \
    && docker-php-ext-enable memcached imagick apcu amqp sockets \
    \
    # Fontcustom - font icons \
-   && apt install -y --no-install-recommends ruby ruby-dev fontforge woff-tools automake libtool \
-   && gem install fontcustom:1.3.8 \
+   && apt install -y --no-install-recommends ruby ruby-dev fontforge woff-tools woff2 automake libtool \
+   && gem install fontcustom:2.0.0 \
    \
    # SASSPHP
    && apt install -y --no-install-recommends git \
