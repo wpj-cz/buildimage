@@ -1,4 +1,4 @@
-FROM php:7.3-cli-bullseye
+FROM php:8.1-cli-bullseye
 
 WORKDIR /var/www/html
 
@@ -26,14 +26,17 @@ RUN set -eux; \
       zlib1g-dev \
       libpcre3-dev \
       libreadline-dev \
-   ;\
-   export UWSGI_VERSION=2.0.19.1; \
+      libonig-dev \
+    ;\
+   export UWSGI_VERSION=2799f48749243a82036b63820c35c696fa302d89; \
    cd /usr/src; \
    curl -fsSL -o uwsgi.tar.gz https://github.com/unbit/uwsgi/archive/${UWSGI_VERSION}.tar.gz; \
    tar -xvzf uwsgi.tar.gz; \
-   cd uwsgi-${UWSGI_VERSION}; \
+   cd /usr/src/uwsgi-${UWSGI_VERSION}; \
+   # uwsgi tries to find libphp8
+   ln -s libphp.so /usr/local/lib/libphp8.so; \
    # Remove '-pie' from ldflags
-   sed -i "s/p_cflags.remove('-pie')/p_ldflags.remove('-pie')/" uwsgiconfig.py;\
+   sed -i "s/p_ldflags_blacklist = ('-Wl,--no-undefined',)/p_ldflags_blacklist = ('-Wl,--no-undefined', '-pie')/" uwsgiconfig.py;\
    python uwsgiconfig.py --build core; \
    python uwsgiconfig.py --plugin plugins/corerouter core; \
    python uwsgiconfig.py --plugin plugins/http core; \
