@@ -28,9 +28,9 @@ RUN set -eux; \
       libreadline-dev \
       libonig-dev \
     ;\
-   export UWSGI_VERSION=2799f48749243a82036b63820c35c696fa302d89; \
+   export UWSGI_VERSION=master; \
    cd /usr/src; \
-   curl -fsSL -o uwsgi.tar.gz https://github.com/unbit/uwsgi/archive/${UWSGI_VERSION}.tar.gz; \
+   curl -fsSL -o uwsgi.tar.gz https://github.com/wpj-cz/uwsgi/archive/refs/heads/${UWSGI_VERSION}.zip; \
    tar -xvzf uwsgi.tar.gz; \
    cd uwsgi-${UWSGI_VERSION}; \
    # uwsgi tries to find libphp8
