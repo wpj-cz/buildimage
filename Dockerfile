@@ -30,7 +30,7 @@ RUN set -eux; \
     ;\
    export UWSGI_VERSION=master; \
    cd /usr/src; \
-   curl -fsSL -o uwsgi.tar.gz https://github.com/wpj-cz/uwsgi/archive/refs/heads/${UWSGI_VERSION}.zip; \
+   curl -fsSL -o uwsgi.tar.gz https://github.com/wpj-cz/uwsgi/archive/refs/heads/${UWSGI_VERSION}.tar.gz; \
    tar -xvzf uwsgi.tar.gz; \
    cd uwsgi-${UWSGI_VERSION}; \
    # uwsgi tries to find libphp8
