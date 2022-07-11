@@ -9,6 +9,7 @@ RUN sed -i 's/MinProtocol = TLSv1.2/MinProtocol = TLSv1.0/g' /etc/ssl/openssl.cn
 
 COPY imagick.xml /var/www/.config/ImageMagick/policy.xml
 COPY imagick.xml /root/.config/ImageMagick/policy.xml
+COPY uwsgi_profile.ini /usr/src/wpj.ini
 
 # UWSGI
 RUN set -eux; \
@@ -28,21 +29,17 @@ RUN set -eux; \
       libreadline-dev \
       libonig-dev \
     ;\
-   export UWSGI_VERSION=master; \
+   export UWSGI_VERSION=php_81_app; \
    cd /usr/src; \
    curl -fsSL -o uwsgi.tar.gz https://github.com/wpj-cz/uwsgi/archive/refs/heads/${UWSGI_VERSION}.tar.gz; \
    tar -xvzf uwsgi.tar.gz; \
    cd uwsgi-${UWSGI_VERSION}; \
+   mv /usr/src/wpj.ini buildconf/wpj.ini
    # uwsgi tries to find libphp8
    ln -s libphp.so /usr/local/lib/libphp8.so; \
    # Remove '-pie' from ldflags
    sed -i "s/p_ldflags_blacklist = ('-Wl,--no-undefined',)/p_ldflags_blacklist = ('-Wl,--no-undefined', '-pie')/" uwsgiconfig.py;\
-   python uwsgiconfig.py --build core; \
-   python uwsgiconfig.py --plugin plugins/corerouter core; \
-   python uwsgiconfig.py --plugin plugins/http core; \
-   python uwsgiconfig.py --plugin plugins/cheaper_busyness core; \
-   python uwsgiconfig.py --plugin plugins/router_static core; \
-   UWSGICONFIG_PHPDIR=/usr/local python uwsgiconfig.py --plugin plugins/php core php ; \
+   UWSGICONFIG_PHPDIR=/usr/local python uwsgiconfig.py --build wpj; \
    mkdir /usr/local/uwsgi; \
    mv uwsgi *_plugin.so /usr/local/uwsgi; \
    rm -rf /usr/src/uwsgi-${UWSGI_VERSION}; \
