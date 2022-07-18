@@ -1,4 +1,4 @@
-FROM php:7.3-cli-bullseye
+FROM php:7.4-cli-bullseye
 
 WORKDIR /var/www/html
 
@@ -9,6 +9,7 @@ RUN sed -i 's/MinProtocol = TLSv1.2/MinProtocol = TLSv1.0/g' /etc/ssl/openssl.cn
 
 COPY imagick.xml /var/www/.config/ImageMagick/policy.xml
 COPY imagick.xml /root/.config/ImageMagick/policy.xml
+COPY uwsgi_profile.ini /usr/src/wpj.ini
 
 # UWSGI
 RUN set -eux; \
@@ -26,20 +27,19 @@ RUN set -eux; \
       zlib1g-dev \
       libpcre3-dev \
       libreadline-dev \
-   ;\
-   export UWSGI_VERSION=2.0.19.1; \
+      libonig-dev \
+    ;\
+   export UWSGI_VERSION=php_81_app; \
    cd /usr/src; \
-   curl -fsSL -o uwsgi.tar.gz https://github.com/unbit/uwsgi/archive/${UWSGI_VERSION}.tar.gz; \
+   curl -fsSL -o uwsgi.tar.gz https://github.com/wpj-cz/uwsgi/archive/refs/heads/${UWSGI_VERSION}.tar.gz; \
    tar -xvzf uwsgi.tar.gz; \
    cd uwsgi-${UWSGI_VERSION}; \
+   mv /usr/src/wpj.ini buildconf/wpj.ini; \
+   # uwsgi tries to find libphp8
+   ln -s libphp.so /usr/local/lib/libphp8.so; \
    # Remove '-pie' from ldflags
-   sed -i "s/p_cflags.remove('-pie')/p_ldflags.remove('-pie')/" uwsgiconfig.py;\
-   python uwsgiconfig.py --build core; \
-   python uwsgiconfig.py --plugin plugins/corerouter core; \
-   python uwsgiconfig.py --plugin plugins/http core; \
-   python uwsgiconfig.py --plugin plugins/cheaper_busyness core; \
-   python uwsgiconfig.py --plugin plugins/router_static core; \
-   UWSGICONFIG_PHPDIR=/usr/local python uwsgiconfig.py --plugin plugins/php core php ; \
+   sed -i "s/p_ldflags_blacklist = ('-Wl,--no-undefined',)/p_ldflags_blacklist = ('-Wl,--no-undefined', '-pie')/" uwsgiconfig.py; \
+   UWSGICONFIG_PHPDIR=/usr/local python uwsgiconfig.py --build wpj; \
    mkdir /usr/local/uwsgi; \
    mv uwsgi *_plugin.so /usr/local/uwsgi; \
    rm -rf /usr/src/uwsgi-${UWSGI_VERSION}; \
@@ -52,29 +52,13 @@ RUN set -eux; \
 
 RUN apt-get update \
    # Core PHP modules \
-   && apt install -y --no-install-recommends libicu-dev libxml2-dev libjpeg62-turbo-dev libbz2-dev zlib1g-dev libc-client-dev libkrb5-dev libmagickwand-dev libxslt-dev libzip-dev mariadb-client \
-   && docker-php-ext-configure imap --with-kerberos --with-imap-ssl \
-   && docker-php-ext-configure gd --with-jpeg-dir=/usr --with-png-dir=/usr \
-   && docker-php-ext-install pdo_mysql intl mbstring soap bz2 xmlrpc zip bcmath imap gd xsl calendar opcache gettext sockets \
+   && apt install -y --no-install-recommends libicu-dev libxml2-dev libjpeg62-turbo-dev libbz2-dev zlib1g-dev libc-client-dev libmagickwand-dev libxslt-dev libzip-dev mariadb-client libonig-dev \
+   && docker-php-ext-install pdo_mysql intl mbstring soap bz2 zip bcmath gd xsl calendar opcache gettext sockets \
    \
    # PECL
    && apt install -y --no-install-recommends libmemcached-dev librabbitmq-dev \
    && pecl install memcached imagick apcu amqp \
    && docker-php-ext-enable memcached imagick apcu amqp sockets \
-   \
-   # Fontcustom - font icons \
-   && apt install -y --no-install-recommends ruby ruby-dev fontforge woff-tools woff2 automake libtool \
-   && gem install fontcustom:2.0.0 \
-   \
-   # SASSPHP
-   && apt install -y --no-install-recommends git \
-   && git clone --recursive https://github.com/absalomedia/sassphp.git /tmp/sassphp -b 0.6.1 \
-   && cd /tmp/sassphp \
-   && cd lib/libsass && sed -i 's/-j 0//' Makefile && make -j1 && cd ../.. \
-   && docker-php-ext-configure /tmp/sassphp \
-   && docker-php-ext-install /tmp/sassphp \
-   && cd .. \
-   && rm -r /tmp/sassphp \
    \
    # Additional apps
    && apt install -y --no-install-recommends nano wget ghostscript less unzip python3-pip \
