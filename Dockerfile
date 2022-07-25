@@ -52,14 +52,14 @@ RUN set -eux; \
 
 RUN apt-get update \
    # Core PHP modules \
-   && apt install -y --no-install-recommends libicu-dev libxml2-dev libjpeg62-turbo-dev libbz2-dev zlib1g-dev libc-client-dev libmagickwand-dev libxslt-dev libzip-dev mariadb-client libonig-dev \
+   && apt install -y --no-install-recommends libicu-dev libxml2-dev libjpeg62-turbo-dev libwebp-dev libbz2-dev zlib1g-dev libc-client-dev libmagickwand-dev libxslt-dev libzip-dev mariadb-client libonig-dev \
    && docker-php-ext-install pdo_mysql intl mbstring soap bz2 zip bcmath gd xsl calendar opcache gettext sockets \
    \
    # PECL
    && apt install -y --no-install-recommends libmemcached-dev librabbitmq-dev \
    && pecl install memcached imagick apcu amqp \
    && docker-php-ext-enable memcached imagick apcu amqp sockets \
-   \
+   && docker-php-ext-configure gd --with-jpeg=/usr --with-webp=/usr \
    # Additional apps
    && apt install -y --no-install-recommends nano wget ghostscript less unzip python3-pip \
    # Install xlsx-streaming python library
