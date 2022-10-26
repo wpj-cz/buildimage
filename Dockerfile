@@ -60,7 +60,7 @@ RUN apt-get update \
    && pecl install memcached imagick apcu amqp \
    && docker-php-ext-enable memcached imagick apcu amqp sockets \
    # Additional apps
-   && apt install -y --no-install-recommends nano wget ghostscript less unzip python3-pip \
+   && apt install -y --no-install-recommends nano procps wget ghostscript less unzip python3-pip \
    # Install xlsx-streaming python library
    && pip install xlsx-streaming \
    \
