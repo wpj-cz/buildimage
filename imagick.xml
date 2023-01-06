@@ -12,4 +12,5 @@
    <policy domain="resource" name="disk" value="3GiB" />
    <policy domain="resource" name="memory" value="2GiB" />
    <policy domain="resource" name="map" value="1GiB" />
+   <policy domain="resource" name="area" value="1GiB"/>
 </policymap>
