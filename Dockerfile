@@ -7,8 +7,6 @@ EXPOSE 80
 # use TLSv1.0
 RUN sed -i 's/MinProtocol = TLSv1.2/MinProtocol = TLSv1.0/g' /etc/ssl/openssl.cnf
 
-COPY imagick.xml /var/www/.config/ImageMagick/policy.xml
-COPY imagick.xml /root/.config/ImageMagick/policy.xml
 COPY uwsgi_profile.ini /usr/src/wpj.ini
 
 # UWSGI
@@ -67,3 +65,5 @@ RUN apt-get update \
    # Cleanup
    && apt-get remove --purge -y libicu-dev libxml2-dev libbz2-dev zlib1g-dev libc-client-dev libkrb5-dev git libmagickwand-dev ruby-dev automake libtool \
    && rm -rf /var/lib/apt/lists/*
+
+COPY imagick.xml /etc/ImageMagick-6/policy.xml
