@@ -9,4 +9,7 @@
       ]>
 <policymap>
    <policy domain="coder" rights="read|write" pattern="{PS,EPS,PDF}" />
+   <policy domain="resource" name="disk" value="3GiB" />
+   <policy domain="resource" name="memory" value="2GiB" />
+   <policy domain="resource" name="map" value="1GiB" />
 </policymap>
