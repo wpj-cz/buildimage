@@ -60,7 +60,7 @@ RUN apt-get update \
    # Additional apps
    && apt install -y --no-install-recommends nano procps iputils-ping wget ghostscript less unzip python3-pip \
    # Install xlsx-streaming python library
-   && pip install xlsx-streaming \
+   && pip install xlsx-streaming json-stream \
    \
    # Cleanup
    && apt-get remove --purge -y libicu-dev libxml2-dev libbz2-dev zlib1g-dev libc-client-dev libkrb5-dev git libmagickwand-dev ruby-dev automake libtool \
