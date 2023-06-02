@@ -67,3 +67,11 @@ RUN apt-get update \
    && rm -rf /var/lib/apt/lists/*
 
 COPY imagick.xml /etc/ImageMagick-6/policy.xml
+
+# V8 runtime
+RUN apt update && apt-get install -o Dpkg::Options::="--force-confdef" -y libnode-dev \
+    && cp /usr/lib/x86_64-linux-gnu/libv8* /usr/local/lib/ \
+    && cp -a /usr/include/node/* /usr/local/include/ \
+    && pecl install v8js \
+    && echo "extension=v8js.so" > /usr/local/etc/php/conf.d/v8js.ini \
+    && apt-get install -y nodejs
