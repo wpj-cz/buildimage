@@ -1,28 +1,3 @@
-# From https://hub.docker.com/layers/mbukovy/php82v8js/latest/images/sha256-c1625f4ee805a4add023250c40fddf0f5a8ad22d46a5626ed82c588de8974951?context=explore
-FROM php:8.2-cli-bullseye as v8jsBuild
-
-ENV V8_VERSION=11.1.277.13
-ENV V8JS_VERSION=php8
-
-RUN apt-get update &&     apt-get install -y --no-install-recommends      build-essential      cron      curl      libglib2.0-dev      libtinfo5      libtinfo-dev      libxml2      iproute2      gnupg2      libyaml-dev      libxml2-dev      git      libzip-dev      libonig-dev      libpng-dev      libjpeg-dev      libfreetype6-dev      python      zlib1g-dev      netcat      unzip      procps
-
-RUN cd /tmp     &&  \
-    git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git --progress --verbose     &&  \
-    export PATH="$PATH:/tmp/depot_tools"     &&  \
-    fetch v8     &&  \
-    cd v8     &&  \
-    git checkout $V8_VERSION     &&  \
-    gclient sync     &&  \
-    tools/dev/v8gen.py -vv x64.release -- is_component_build=true use_custom_libcxx=false     &&  \
-    cd /tmp/v8     &&  \
-    ninja -j 4 -C out.gn/x64.release/ && \
-    mkdir -p /opt/v8/lib &&  \
-    mkdir -p /opt/v8/include     &&  \
-    cp out.gn/x64.release/lib*.so out.gn/x64.release/*_blob.bin out.gn/x64.release/icudtl.dat /opt/v8/lib/     &&  \
-    cp -R include/* /opt/v8/include/
-
-
-
 FROM php:8.2-cli-bullseye
 
 WORKDIR /var/www/html
@@ -94,14 +69,14 @@ RUN apt-get update \
 COPY imagick.xml /etc/ImageMagick-6/policy.xml
 
 ## V8 runtime
-COPY --from=v8jsBuild /opt/v8/ /opt/v8/
+COPY --from=stesie/libv8-10.5:no-sandbox /opt/libv8-10.5 /opt/v8/
 
 RUN cd /tmp && \
     wget https://github.com/phpv8/v8js/archive/refs/heads/php8.tar.gz && \
     tar xvzf php8.tar.gz && \
     cd v8js-php8 && \
     phpize     &&  \
-    ./configure --with-v8js=/opt/v8 LDFLAGS="-lstdc++" CPPFLAGS="-DV8_COMPRESS_POINTERS -DV8_ENABLE_SANDBOX"     &&  \
+    ./configure --with-v8js=/opt/v8 LDFLAGS="-lstdc++" CPPFLAGS="-DV8_COMPRESS_POINTERS "     &&  \
     make  -j4   &&  \
     make install && \
     echo "extension=v8js.so" > /usr/local/etc/php/conf.d/v8js.ini
