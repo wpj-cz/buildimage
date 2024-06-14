@@ -1,4 +1,4 @@
-FROM php:8.2-cli-bullseye
+FROM php:8.3-cli-bookworm
 
 WORKDIR /var/www/html
 
@@ -14,7 +14,7 @@ RUN set -eux; \
    savedAptMark="$(apt-mark showmanual)"; \
 	apt-get update; \
 	apt-get install -y --no-install-recommends \
-		python \
+		python3 \
 		libargon2-dev \
       libcurl4-openssl-dev \
       libedit-dev \
@@ -23,7 +23,7 @@ RUN set -eux; \
       libssl-dev \
       libxml2-dev \
       zlib1g-dev \
-      libpcre3-dev \
+      libpcre2-dev \
       libreadline-dev \
       libonig-dev \
     ;\
@@ -37,7 +37,7 @@ RUN set -eux; \
    ln -s libphp.so /usr/local/lib/libphp8.so; \
    # Remove '-pie' from ldflags
    sed -i "s/p_ldflags_blacklist = ('-Wl,--no-undefined',)/p_ldflags_blacklist = ('-Wl,--no-undefined', '-pie')/" uwsgiconfig.py; \
-   UWSGICONFIG_PHPDIR=/usr/local python uwsgiconfig.py --build wpj; \
+   UWSGICONFIG_PHPDIR=/usr/local python3 uwsgiconfig.py --build wpj; \
    mkdir /usr/local/uwsgi; \
    mv uwsgi *_plugin.so /usr/local/uwsgi; \
    rm -rf /usr/src/uwsgi-${UWSGI_VERSION}; \
@@ -50,7 +50,7 @@ RUN set -eux; \
 
 RUN apt-get update \
    # Core PHP modules \
-   && apt install -y --no-install-recommends libicu-dev libxml2-dev libjpeg62-turbo-dev libwebp-dev libbz2-dev zlib1g-dev libc-client-dev libmagickwand-dev libxslt-dev libzip-dev mariadb-client libonig-dev \
+   && apt install -y --no-install-recommends libicu-dev libxml2-dev wget libjpeg62-turbo-dev libwebp-dev libbz2-dev zlib1g-dev libc-client-dev libmagickwand-dev libxslt-dev libzip-dev mariadb-client libonig-dev \
    && docker-php-ext-configure gd --with-jpeg=/usr --with-webp=/usr \
    && docker-php-ext-install pdo_mysql intl mbstring soap bz2 zip bcmath gd xsl calendar opcache gettext sockets \
    # PECL
@@ -59,9 +59,9 @@ RUN apt-get update \
    && pecl install --configureoptions 'enable-redis-igbinary="yes"' redis \
    && docker-php-ext-enable igbinary memcached imagick apcu amqp sockets redis \
    # Additional apps
-   && apt install -y --no-install-recommends nano procps iputils-ping wget ghostscript less unzip python3-pip \
+   && apt install -y --no-install-recommends nano procps iputils-ping ghostscript less unzip python3-pip \
    # Install xlsx-streaming python library
-   && pip install xlsx-streaming json-stream \
+   && pip install --break-system-packages xlsx-streaming json-stream \
    \
    # Cleanup
    && apt-get remove --purge -y libicu-dev libxml2-dev libbz2-dev zlib1g-dev libc-client-dev libkrb5-dev git libmagickwand-dev ruby-dev automake libtool \
