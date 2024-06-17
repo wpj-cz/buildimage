@@ -55,9 +55,9 @@ RUN apt-get update \
    && docker-php-ext-install pdo_mysql intl mbstring soap bz2 zip bcmath gd xsl calendar opcache gettext sockets \
    # PECL
    && apt install -y --no-install-recommends libmemcached-dev librabbitmq-dev \
-   && pecl install memcached imagick apcu amqp igbinary \
+   && pecl install memcached imagick@master apcu amqp igbinary \
    && pecl install --configureoptions 'enable-redis-igbinary="yes"' redis \
-   && docker-php-ext-enable igbinary memcached imagick@master apcu amqp sockets redis \
+   && docker-php-ext-enable igbinary memcached imagick apcu amqp sockets redis \
    # Additional apps
    && apt install -y --no-install-recommends nano procps iputils-ping ghostscript less unzip python3-pip \
    # Install xlsx-streaming python library
