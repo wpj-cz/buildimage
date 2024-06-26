@@ -4,8 +4,8 @@ WORKDIR /var/www/html
 
 EXPOSE 80
 
-# Append MinProtocol and CipherString settings under [system_default_sect]
-RUN echo -e '\n[system_default_sect]\nMinProtocol = TLSv1.0\nCipherString = DEFAULT@SECLEVEL=1' >> /etc/ssl/openssl.cnf
+# use TLSv1.0
+RUN sed -i 's/MinProtocol = TLSv1.2/MinProtocol = TLSv1.0/g' /etc/ssl/openssl.cnf
 
 COPY uwsgi_profile.ini /usr/src/wpj.ini
 
