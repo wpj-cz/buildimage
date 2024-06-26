@@ -5,7 +5,13 @@ WORKDIR /var/www/html
 EXPOSE 80
 
 # use TLSv1.0
-RUN sed -i 's/MinProtocol = TLSv1.2/MinProtocol = TLSv1.0/g' /etc/ssl/openssl.cnf
+RUN set -eux; \
+   sed -i '/\[openssl_init\]/a ssl_conf = ssl_configuration' /etc/ssl/openssl.cnf; \
+   echo "\n[ssl_configuration]" >> /etc/ssl/openssl.cnf; \
+   echo "system_default = tls_system_default" >> /etc/ssl/openssl.cnf; \
+   echo "\n[tls_system_default]" >> /etc/ssl/openssl.cnf; \
+   echo "MinProtocol = TLSv1" >> /etc/ssl/openssl.cnf; \
+   echo "CipherString = DEFAULT@SECLEVEL=0" >> /etc/ssl/openssl.cnf;
 
 COPY uwsgi_profile.ini /usr/src/wpj.ini
 
