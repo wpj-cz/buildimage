@@ -33,9 +33,9 @@ RUN set -eux; \
       libreadline-dev \
       libonig-dev \
     ;\
-   export UWSGI_VERSION=master; \
+   export UWSGI_VERSION=php_disconnect; \
    cd /usr/src; \
-   curl -fsSL -o uwsgi.tar.gz https://github.com/unbit/uwsgi/archive/refs/heads/${UWSGI_VERSION}.tar.gz; \
+   curl -fsSL -o uwsgi.tar.gz https://github.com/cuchac/uwsgi/archive/refs/heads/${UWSGI_VERSION}.tar.gz; \
    tar -xvzf uwsgi.tar.gz; \
    cd uwsgi-${UWSGI_VERSION}; \
    mv /usr/src/wpj.ini buildconf/wpj.ini; \
