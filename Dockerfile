@@ -61,8 +61,8 @@ RUN apt-get update \
    && docker-php-ext-configure ftp --with-openssl-dir=/usr \
    && docker-php-ext-install pdo_mysql intl mbstring soap bz2 zip bcmath gd xsl calendar opcache gettext sockets ftp \
    # PECL
-   && apt install -y --no-install-recommends libmemcached-dev librabbitmq-dev librdkafka-dev \
-   && pecl install memcached imagick apcu amqp igbinary rdkafka \
+   && apt install -y --no-install-recommends libmemcached-dev librabbitmq-dev \
+   && pecl install memcached imagick apcu amqp igbinary \
    && pecl install --configureoptions 'enable-redis-igbinary="yes"' redis \
    && docker-php-ext-enable igbinary memcached imagick apcu amqp sockets redis \
    # Additional apps
