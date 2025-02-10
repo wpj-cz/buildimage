@@ -1,11 +1,17 @@
-FROM php:8.2-cli-bullseye
+FROM php:8.3-cli-bookworm
 
 WORKDIR /var/www/html
 
 EXPOSE 80
 
 # use TLSv1.0
-RUN sed -i 's/MinProtocol = TLSv1.2/MinProtocol = TLSv1.0/g' /etc/ssl/openssl.cnf
+RUN set -eux; \
+   sed -i '/\[openssl_init\]/a ssl_conf = ssl_configuration' /etc/ssl/openssl.cnf; \
+   echo "\n[ssl_configuration]" >> /etc/ssl/openssl.cnf; \
+   echo "system_default = tls_system_default" >> /etc/ssl/openssl.cnf; \
+   echo "\n[tls_system_default]" >> /etc/ssl/openssl.cnf; \
+   echo "MinProtocol = TLSv1" >> /etc/ssl/openssl.cnf; \
+   echo "CipherString = DEFAULT@SECLEVEL=0" >> /etc/ssl/openssl.cnf;
 
 COPY uwsgi_profile.ini /usr/src/wpj.ini
 
@@ -14,7 +20,7 @@ RUN set -eux; \
    savedAptMark="$(apt-mark showmanual)"; \
 	apt-get update; \
 	apt-get install -y --no-install-recommends \
-		python \
+		python3 \
 		libargon2-dev \
       libcurl4-openssl-dev \
       libedit-dev \
@@ -23,13 +29,13 @@ RUN set -eux; \
       libssl-dev \
       libxml2-dev \
       zlib1g-dev \
-      libpcre3-dev \
+      libpcre2-dev \
       libreadline-dev \
       libonig-dev \
     ;\
-   export UWSGI_VERSION=master; \
+   export UWSGI_VERSION=php_disconnect; \
    cd /usr/src; \
-   curl -fsSL -o uwsgi.tar.gz https://github.com/unbit/uwsgi/archive/refs/heads/${UWSGI_VERSION}.tar.gz; \
+   curl -fsSL -o uwsgi.tar.gz https://github.com/cuchac/uwsgi/archive/refs/heads/${UWSGI_VERSION}.tar.gz; \
    tar -xvzf uwsgi.tar.gz; \
    cd uwsgi-${UWSGI_VERSION}; \
    mv /usr/src/wpj.ini buildconf/wpj.ini; \
@@ -37,7 +43,7 @@ RUN set -eux; \
    ln -s libphp.so /usr/local/lib/libphp8.so; \
    # Remove '-pie' from ldflags
    sed -i "s/p_ldflags_blacklist = ('-Wl,--no-undefined',)/p_ldflags_blacklist = ('-Wl,--no-undefined', '-pie')/" uwsgiconfig.py; \
-   UWSGICONFIG_PHPDIR=/usr/local python uwsgiconfig.py --build wpj; \
+   UWSGICONFIG_PHPDIR=/usr/local python3 uwsgiconfig.py --build wpj; \
    mkdir /usr/local/uwsgi; \
    mv uwsgi *_plugin.so /usr/local/uwsgi; \
    rm -rf /usr/src/uwsgi-${UWSGI_VERSION}; \
@@ -50,27 +56,39 @@ RUN set -eux; \
 
 RUN apt-get update \
    # Core PHP modules \
-   && apt install -y --no-install-recommends libicu-dev libxml2-dev libjpeg62-turbo-dev libwebp-dev libbz2-dev zlib1g-dev libc-client-dev libmagickwand-dev libxslt-dev libzip-dev mariadb-client libonig-dev \
+   && apt install -y --no-install-recommends libicu-dev libxml2-dev wget libjpeg62-turbo-dev libwebp-dev libbz2-dev zlib1g-dev libc-client-dev libmagickwand-dev libxslt-dev libzip-dev mariadb-client libonig-dev \
    && docker-php-ext-configure gd --with-jpeg=/usr --with-webp=/usr \
-   && docker-php-ext-install pdo_mysql intl mbstring soap bz2 zip bcmath gd xsl calendar opcache gettext sockets \
+   && docker-php-ext-configure ftp --with-openssl-dir=/usr \
+   && docker-php-ext-install pdo_mysql intl mbstring soap bz2 zip bcmath gd xsl calendar opcache gettext sockets ftp \
    # PECL
-   && apt install -y --no-install-recommends libmemcached-dev librabbitmq-dev \
-   && pecl install memcached imagick apcu amqp igbinary \
+   && apt install -y --no-install-recommends libmemcached-dev librabbitmq-dev librdkafka-dev \
+   && pecl install memcached apcu amqp igbinary rdkafka \
    && pecl install --configureoptions 'enable-redis-igbinary="yes"' redis \
-   && docker-php-ext-enable igbinary memcached imagick apcu amqp sockets redis \
+   && docker-php-ext-enable igbinary memcached apcu amqp sockets redis \
    # Additional apps
-   && apt install -y --no-install-recommends nano procps iputils-ping wget ghostscript less unzip python3-pip \
+   && apt-get update && apt-get install -y --no-install-recommends nano procps iputils-ping ghostscript less unzip python3-pip \
    # Install xlsx-streaming python library
-   && pip install xlsx-streaming json-stream \
-   \
-   # Cleanup
-   && apt-get remove --purge -y libicu-dev libxml2-dev libbz2-dev zlib1g-dev libc-client-dev libkrb5-dev git libmagickwand-dev ruby-dev automake libtool \
-   && rm -rf /var/lib/apt/lists/*
+   && pip install --break-system-packages xlsx-streaming json-stream
+
+RUN cd /tmp && \
+   wget https://github.com/Imagick/imagick/archive/refs/heads/master.tar.gz && \
+   tar xvzf master.tar.gz && \
+   cd imagick-master && \
+   phpize && \
+   ls && \
+   ./configure && \
+   make && \
+   make install && \
+   docker-php-ext-enable imagick
+
+# Cleanup
+RUN apt-get remove --purge -y libicu-dev libxml2-dev libbz2-dev zlib1g-dev libc-client-dev libkrb5-dev git libmagickwand-dev ruby-dev automake libtool \
+&& rm -rf /var/lib/apt/lists/*
 
 COPY imagick.xml /etc/ImageMagick-6/policy.xml
 
 ## V8 runtime
-COPY --from=stesie/libv8-10.5:no-sandbox /opt/libv8-10.5 /opt/v8/
+COPY --from=lukastrkan/libv8:10.7.193 /opt/libv8 /opt/v8/
 
 RUN cd /tmp && \
     wget https://github.com/phpv8/v8js/archive/refs/heads/php8.tar.gz && \
