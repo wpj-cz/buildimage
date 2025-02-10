@@ -7,16 +7,17 @@ EXPOSE 80
 ARG TARGETARCH
 RUN if [ "$TARGETARCH" = "arm64" ]; then \
     echo "Setting cross-compilation environment for ARM64"; \
-    export CC=aarch64-linux-gnu-gcc; \
-    export CXX=aarch64-linux-gnu-g++; \
-    export AR=aarch64-linux-gnu-ar; \
-    export AS=aarch64-linux-gnu-as; \
-    export RANLIB=aarch64-linux-gnu-ranlib; \
-    export LD=aarch64-linux-gnu-ld; \
-    export STRIP=aarch64-linux-gnu-strip; \
-    export NM=aarch64-linux-gnu-nm; \
-    export LDFLAGS="-L/usr/aarch64-linux-gnu/lib"; \
+    echo 'CC=aarch64-linux-gnu-gcc' >> /etc/environment; \
+    echo 'CXX=aarch64-linux-gnu-g++' >> /etc/environment; \
+    echo 'AR=aarch64-linux-gnu-ar' >> /etc/environment; \
+    echo 'AS=aarch64-linux-gnu-as' >> /etc/environment; \
+    echo 'RANLIB=aarch64-linux-gnu-ranlib' >> /etc/environment; \
+    echo 'LD=aarch64-linux-gnu-ld' >> /etc/environment; \
+    echo 'STRIP=aarch64-linux-gnu-strip' >> /etc/environment; \
+    echo 'NM=aarch64-linux-gnu-nm' >> /etc/environment; \
+    echo 'LDFLAGS=-L/usr/aarch64-linux-gnu/lib' >> /etc/environment; \
   fi
+
 
 # use TLSv1.0
 RUN set -eux; \
