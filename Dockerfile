@@ -5,19 +5,6 @@ WORKDIR /var/www/html
 EXPOSE 80
 
 ARG TARGETARCH
-RUN if [ "$TARGETARCH" = "arm64" ]; then \
-    echo "Setting cross-compilation environment for ARM64"; \
-    echo 'CC=aarch64-linux-gnu-gcc' >> /etc/environment; \
-    echo 'CXX=aarch64-linux-gnu-g++' >> /etc/environment; \
-    echo 'AR=aarch64-linux-gnu-ar' >> /etc/environment; \
-    echo 'AS=aarch64-linux-gnu-as' >> /etc/environment; \
-    echo 'RANLIB=aarch64-linux-gnu-ranlib' >> /etc/environment; \
-    echo 'LD=aarch64-linux-gnu-ld' >> /etc/environment; \
-    echo 'STRIP=aarch64-linux-gnu-strip' >> /etc/environment; \
-    echo 'NM=aarch64-linux-gnu-nm' >> /etc/environment; \
-    echo 'LDFLAGS=-L/usr/aarch64-linux-gnu/lib' >> /etc/environment; \
-  fi
-
 
 # use TLSv1.0
 RUN set -eux; \
@@ -81,6 +68,18 @@ RUN apt-get update \
     fi \
    && docker-php-ext-configure gd --host=$CROSS_HOST --with-jpeg=/usr --with-webp=/usr \
    && docker-php-ext-configure ftp --host=$CROSS_HOST --with-openssl-dir=/usr \
+   && docker-php-ext-configure intl --host=$CROSS_HOST \
+   && docker-php-ext-configure mbstring --host=$CROSS_HOST \
+   && docker-php-ext-configure soap --host=$CROSS_HOST \
+   && docker-php-ext-configure bz2 --host=$CROSS_HOST \
+   && docker-php-ext-configure zip --host=$CROSS_HOST \
+   && docker-php-ext-configure bcmath --host=$CROSS_HOST \
+   && docker-php-ext-configure xsl --host=$CROSS_HOST \
+   && docker-php-ext-configure calendar --host=$CROSS_HOST \
+   && docker-php-ext-configure opcache --host=$CROSS_HOST \
+   && docker-php-ext-configure gettext --host=$CROSS_HOST \
+   && docker-php-ext-configure sockets --host=$CROSS_HOST \
+   && docker-php-ext-configure ftp --host=$CROSS_HOST \
    && docker-php-ext-install pdo_mysql intl mbstring soap bz2 zip bcmath gd xsl calendar opcache gettext sockets ftp \
    # PECL
    && apt install -y --no-install-recommends libmemcached-dev librabbitmq-dev librdkafka-dev \
