@@ -4,6 +4,20 @@ WORKDIR /var/www/html
 
 EXPOSE 80
 
+ARG TARGETARCH
+RUN if [ "$TARGETARCH" = "arm64" ]; then \
+    echo "Setting cross-compilation environment for ARM64"; \
+    export CC=aarch64-linux-gnu-gcc; \
+    export CXX=aarch64-linux-gnu-g++; \
+    export AR=aarch64-linux-gnu-ar; \
+    export AS=aarch64-linux-gnu-as; \
+    export RANLIB=aarch64-linux-gnu-ranlib; \
+    export LD=aarch64-linux-gnu-ld; \
+    export STRIP=aarch64-linux-gnu-strip; \
+    export NM=aarch64-linux-gnu-nm; \
+    export LDFLAGS="-L/usr/aarch64-linux-gnu/lib"; \
+  fi
+
 # use TLSv1.0
 RUN set -eux; \
    sed -i '/\[openssl_init\]/a ssl_conf = ssl_configuration' /etc/ssl/openssl.cnf; \
