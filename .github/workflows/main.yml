@@ -81,104 +81,34 @@ jobs:
           push: true
           tags: wpjsro/build-base:${{ steps.extract_branch.outputs.branch }}-arm64
 
-  name: Build and push image
+  merge-images:
+    runs-on: ubuntu-latest
+    needs: [ build-amd64, build-arm64 ]
 
-  on:
-    push:
-      branches: [ '**' ]
-    workflow_dispatch:
+    steps:
+      - name: Extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF##*/})"
+        id: extract_branch
 
-  jobs:
-    build-amd64:
-      runs-on: ubuntu-latest
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_LOGIN }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
-      steps:
-        - name: Extract branch name
-          shell: bash
-          run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF##*/})"
-          id: extract_branch
+      - name: Create and push Docker manifest for latest
+        if: ${{ steps.extract_branch.outputs.branch == 'master' }}
+        run: |
+          docker manifest create wpjsro/build-base:latest \
+            --amend wpjsro/build-base:latest-amd64 \
+            --amend wpjsro/build-base:latest-arm64
+          docker manifest push wpjsro/build-base:latest
 
-        - name: Login to DockerHub
-          uses: docker/login-action@v1
-          with:
-            username: ${{ secrets.DOCKER_LOGIN }}
-            password: ${{ secrets.DOCKER_PASSWORD }}
-
-        - name: Build and push latest image (AMD64)
-          if: ${{ steps.extract_branch.outputs.branch == 'master' }}
-          uses: docker/build-push-action@v2
-          with:
-            context: .
-            push: true
-            tags: wpjsro/build-base:latest-amd64
-
-        - name: Build and push tagged image (AMD64)
-          if: ${{ steps.extract_branch.outputs.branch != 'master' }}
-          uses: docker/build-push-action@v2
-          with:
-            context: .
-            push: true
-            tags: wpjsro/build-base:${{ steps.extract_branch.outputs.branch }}-amd64
-
-    build-arm64:
-      runs-on: ubuntu-24.04-arm
-
-      steps:
-        - name: Extract branch name
-          shell: bash
-          run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF##*/})"
-          id: extract_branch
-
-        - name: Login to DockerHub
-          uses: docker/login-action@v1
-          with:
-            username: ${{ secrets.DOCKER_LOGIN }}
-            password: ${{ secrets.DOCKER_PASSWORD }}
-
-        - name: Build and push latest image (ARM64)
-          if: ${{ steps.extract_branch.outputs.branch == 'master' }}
-          uses: docker/build-push-action@v2
-          with:
-            context: .
-            push: true
-            tags: wpjsro/build-base:latest-arm64
-
-        - name: Build and push tagged image (ARM64)
-          if: ${{ steps.extract_branch.outputs.branch != 'master' }}
-          uses: docker/build-push-action@v2
-          with:
-            context: .
-            push: true
-            tags: wpjsro/build-base:${{ steps.extract_branch.outputs.branch }}-arm64
-
-    merge-images:
-      runs-on: ubuntu-latest
-      needs: [ build-amd64, build-arm64 ]
-
-      steps:
-        - name: Extract branch name
-          shell: bash
-          run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF##*/})"
-          id: extract_branch
-
-        - name: Login to DockerHub
-          uses: docker/login-action@v1
-          with:
-            username: ${{ secrets.DOCKER_LOGIN }}
-            password: ${{ secrets.DOCKER_PASSWORD }}
-
-        - name: Create and push Docker manifest for latest
-          if: ${{ steps.extract_branch.outputs.branch == 'master' }}
-          run: |
-            docker manifest create wpjsro/build-base:latest \
-              --amend wpjsro/build-base:latest-amd64 \
-              --amend wpjsro/build-base:latest-arm64
-            docker manifest push wpjsro/build-base:latest
-
-        - name: Create and push Docker manifest for tagged versions
-          if: ${{ steps.extract_branch.outputs.branch != 'master' }}
-          run: |
-            docker manifest create wpjsro/build-base:${{ steps.extract_branch.outputs.branch }} \
-              --amend wpjsro/build-base:${{ steps.extract_branch.outputs.branch }}-amd64 \
-              --amend wpjsro/build-base:${{ steps.extract_branch.outputs.branch }}-arm64
-            docker manifest push wpjsro/build-base:${{ steps.extract_branch.outputs.branch }}
+      - name: Create and push Docker manifest for tagged versions
+        if: ${{ steps.extract_branch.outputs.branch != 'master' }}
+        run: |
+          docker manifest create wpjsro/build-base:${{ steps.extract_branch.outputs.branch }} \
+            --amend wpjsro/build-base:${{ steps.extract_branch.outputs.branch }}-amd64 \
+            --amend wpjsro/build-base:${{ steps.extract_branch.outputs.branch }}-arm64
+          docker manifest push wpjsro/build-base:${{ steps.extract_branch.outputs.branch }}
