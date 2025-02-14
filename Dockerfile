@@ -59,27 +59,8 @@ RUN set -eux; \
 RUN apt-get update \
    # Core PHP modules \
    && apt install -y --no-install-recommends libicu-dev libxml2-dev wget libjpeg62-turbo-dev libwebp-dev libbz2-dev zlib1g-dev libc-client-dev libmagickwand-dev libxslt-dev libzip-dev mariadb-client libonig-dev \
-   && if [ "$TARGETARCH" = "arm64" ]; then \
-        export CROSS_HOST=aarch64-linux-gnu; \
-    elif [ "$TARGETARCH" = "amd64" ]; then \
-        export CROSS_HOST=x86_64-linux-gnu; \
-    else \
-        echo "Unsupported architecture: $TARGETARCH"; exit 1; \
-    fi \
-   && docker-php-ext-configure gd --host=$CROSS_HOST --with-jpeg=/usr --with-webp=/usr \
-   && docker-php-ext-configure ftp --host=$CROSS_HOST --with-openssl-dir=/usr \
-   && docker-php-ext-configure intl --host=$CROSS_HOST \
-   && docker-php-ext-configure mbstring --host=$CROSS_HOST \
-   && docker-php-ext-configure soap --host=$CROSS_HOST \
-   && docker-php-ext-configure bz2 --host=$CROSS_HOST \
-   && docker-php-ext-configure zip --host=$CROSS_HOST \
-   && docker-php-ext-configure bcmath --host=$CROSS_HOST \
-   && docker-php-ext-configure xsl --host=$CROSS_HOST \
-   && docker-php-ext-configure calendar --host=$CROSS_HOST \
-   && docker-php-ext-configure opcache --host=$CROSS_HOST \
-   && docker-php-ext-configure gettext --host=$CROSS_HOST \
-   && docker-php-ext-configure sockets --host=$CROSS_HOST \
-   && docker-php-ext-configure ftp --host=$CROSS_HOST \
+   && docker-php-ext-configure gd --with-jpeg=/usr --with-webp=/usr \
+   && docker-php-ext-configure ftp --with-openssl-dir=/usr \
    && docker-php-ext-install pdo_mysql intl mbstring soap bz2 zip bcmath gd xsl calendar opcache gettext sockets ftp \
    # PECL
    && apt install -y --no-install-recommends libmemcached-dev librabbitmq-dev librdkafka-dev \
