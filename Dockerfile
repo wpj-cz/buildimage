@@ -100,7 +100,8 @@ RUN cd /tmp && \
     ./configure --with-v8js=/opt/v8 LDFLAGS="-lstdc++" CPPFLAGS="-DV8_COMPRESS_POINTERS "     &&  \
     make  -j4   &&  \
     make install && \
-    echo "extension=v8js.so" > /usr/local/etc/php/conf.d/v8js.ini
+    echo "extension=v8js.so" > /usr/local/etc/php/conf.d/v8js.ini && \
+    rm -rf /tmp/*
 
 FROM php:8.3-cli-bookworm
 
