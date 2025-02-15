@@ -21,7 +21,7 @@ jobs:
       # Extract branch name
       - name: Extract branch name
         shell: bash
-        run: echo "branch=${GITHUB_REF##*/}" >> $GITHUB_ENV
+        run: echo "branch=${GITHUB_REF##*/}" >> $GITHUB_OUTPUT
         id: extract_branch
 
       # Login to docker hub
@@ -55,7 +55,7 @@ jobs:
       # Extract branch name
       - name: Extract branch name
         shell: bash
-        run: echo "branch=${GITHUB_REF##*/}" >> $GITHUB_ENV
+        run: echo "branch=${GITHUB_REF##*/}" >> $GITHUB_OUTPUT
         id: extract_branch
 
       # Login to docker hub
@@ -88,7 +88,7 @@ jobs:
     steps:
       - name: Extract branch name
         shell: bash
-        run: echo "branch=${GITHUB_REF##*/}" >> $GITHUB_ENV
+        run: echo "branch=${GITHUB_REF##*/}" >> $GITHUB_OUTPUT
         id: extract_branch
 
       - name: Login to DockerHub
