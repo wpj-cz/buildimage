@@ -1,4 +1,4 @@
-FROM php:8.3-cli-bookworm
+FROM php:8.3-cli-bookworm as builder
 
 WORKDIR /var/www/html
 
@@ -73,11 +73,11 @@ RUN apt-get update \
    && pip install --break-system-packages xlsx-streaming json-stream
 
 RUN cd /tmp && \
-   wget https://github.com/Imagick/imagick/archive/refs/heads/master.tar.gz && \
-   tar xvzf master.tar.gz && \
-   cd imagick-master && \
+   export IMAGICK_VERSION=3.7.0 && \
+   wget -O imagick.tar.gz https://github.com/Imagick/imagick/archive/refs/heads/${IMAGICK_VERSION}.tar.gz && \
+   tar xvzf imagick.tar.gz && \
+   cd imagick-${IMAGICK_VERSION} && \
    phpize && \
-   ls && \
    ./configure && \
    make && \
    make install && \
@@ -101,3 +101,7 @@ RUN cd /tmp && \
     make  -j4   &&  \
     make install && \
     echo "extension=v8js.so" > /usr/local/etc/php/conf.d/v8js.ini
+
+FROM php:8.3-cli-bookworm
+
+COPY --from=builder / /
