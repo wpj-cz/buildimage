@@ -1,8 +1,10 @@
-FROM php:8.3-cli-bookworm
+FROM php:8.3-cli-bookworm as builder
 
 WORKDIR /var/www/html
 
 EXPOSE 80
+
+ARG TARGETARCH
 
 # use TLSv1.0
 RUN set -eux; \
@@ -62,22 +64,33 @@ RUN apt-get update \
    && docker-php-ext-install pdo_mysql intl mbstring soap bz2 zip bcmath gd xsl calendar opcache gettext sockets ftp \
    # PECL
    && apt install -y --no-install-recommends libmemcached-dev librabbitmq-dev librdkafka-dev \
-   && pecl install memcached imagick apcu amqp igbinary rdkafka \
+   && pecl install memcached apcu amqp igbinary rdkafka \
    && pecl install --configureoptions 'enable-redis-igbinary="yes"' redis \
-   && docker-php-ext-enable igbinary memcached imagick apcu amqp sockets redis \
+   && docker-php-ext-enable igbinary memcached apcu amqp sockets redis \
    # Additional apps
-   && apt install -y --no-install-recommends nano procps iputils-ping ghostscript less unzip python3-pip \
+   && apt-get update && apt-get install -y --no-install-recommends nano procps iputils-ping ghostscript less unzip python3-pip \
    # Install xlsx-streaming python library
-   && pip install --break-system-packages xlsx-streaming json-stream \
-   \
-   # Cleanup
-   && apt-get remove --purge -y libicu-dev libxml2-dev libbz2-dev zlib1g-dev libc-client-dev libkrb5-dev git libmagickwand-dev ruby-dev automake libtool \
-   && rm -rf /var/lib/apt/lists/*
+   && pip install --break-system-packages xlsx-streaming json-stream
+
+RUN cd /tmp && \
+   export IMAGICK_VERSION=3.7.0 && \
+   wget -O imagick.tar.gz https://github.com/Imagick/imagick/archive/refs/heads/${IMAGICK_VERSION}.tar.gz && \
+   tar xvzf imagick.tar.gz && \
+   cd imagick-${IMAGICK_VERSION} && \
+   phpize && \
+   ./configure && \
+   make && \
+   make install && \
+   docker-php-ext-enable imagick
+
+# Cleanup
+RUN apt-get remove --purge -y libicu-dev libxml2-dev libbz2-dev zlib1g-dev libc-client-dev libkrb5-dev git libmagickwand-dev ruby-dev automake libtool \
+&& rm -rf /var/lib/apt/lists/*
 
 COPY imagick.xml /etc/ImageMagick-6/policy.xml
 
 ## V8 runtime
-COPY --from=stesie/libv8-10.5:no-sandbox /opt/libv8-10.5 /opt/v8/
+COPY --from=lukastrkan/libv8:10.7.193 /opt/libv8 /opt/v8/
 
 RUN cd /tmp && \
     wget https://github.com/phpv8/v8js/archive/refs/heads/php8.tar.gz && \
@@ -87,4 +100,9 @@ RUN cd /tmp && \
     ./configure --with-v8js=/opt/v8 LDFLAGS="-lstdc++" CPPFLAGS="-DV8_COMPRESS_POINTERS "     &&  \
     make  -j4   &&  \
     make install && \
-    echo "extension=v8js.so" > /usr/local/etc/php/conf.d/v8js.ini
+    echo "extension=v8js.so" > /usr/local/etc/php/conf.d/v8js.ini && \
+    rm -rf /tmp/*
+
+FROM php:8.3-cli-bookworm
+
+COPY --from=builder / /
