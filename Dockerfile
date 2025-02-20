@@ -2,8 +2,6 @@ FROM php:8.3-cli-bookworm as builder
 
 WORKDIR /var/www/html
 
-EXPOSE 80
-
 ARG TARGETARCH
 
 # use TLSv1.0
@@ -104,5 +102,9 @@ RUN cd /tmp && \
     rm -rf /tmp/*
 
 FROM php:8.3-cli-bookworm
+
+WORKDIR /var/www/html
+
+EXPOSE 80
 
 COPY --from=builder / /
