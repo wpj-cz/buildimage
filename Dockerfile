@@ -1,4 +1,4 @@
-FROM php:8.3-cli-bookworm as builder
+FROM php:8.4-cli-bookworm as builder
 
 WORKDIR /var/www/html
 
@@ -58,7 +58,7 @@ RUN apt-get update \
    # Core PHP modules \
    && apt install -y --no-install-recommends libicu-dev libxml2-dev wget libjpeg62-turbo-dev libwebp-dev libbz2-dev zlib1g-dev libc-client-dev libmagickwand-dev libxslt-dev libzip-dev mariadb-client libonig-dev \
    && docker-php-ext-configure gd --with-jpeg=/usr --with-webp=/usr \
-   && docker-php-ext-configure ftp --with-openssl-dir=/usr \
+   && docker-php-ext-configure ftp --with-ftp-ssl  \
    && docker-php-ext-install pdo_mysql intl mbstring soap bz2 zip bcmath gd xsl calendar opcache gettext sockets ftp \
    # PECL
    && apt install -y --no-install-recommends libmemcached-dev librabbitmq-dev librdkafka-dev \
@@ -101,7 +101,7 @@ RUN cd /tmp && \
     echo "extension=v8js.so" > /usr/local/etc/php/conf.d/v8js.ini && \
     rm -rf /tmp/*
 
-FROM php:8.3-cli-bookworm
+FROM php:8.4-cli-bookworm
 
 WORKDIR /var/www/html
 
