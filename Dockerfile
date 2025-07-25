@@ -33,16 +33,16 @@ RUN set -eux; \
       libreadline-dev \
       libonig-dev \
     ;\
-   export UWSGI_VERSION=php_disconnect; \
+   export UWSGI_VERSION=2.0.30; \
    cd /usr/src; \
-   curl -fsSL -o uwsgi.tar.gz https://github.com/cuchac/uwsgi/archive/refs/heads/${UWSGI_VERSION}.tar.gz; \
+   curl -fsSL -o uwsgi.tar.gz https://github.com/unbit/uwsgi/archive/refs/tags/${UWSGI_VERSION}.tar.gz; \
    tar -xvzf uwsgi.tar.gz; \
    cd uwsgi-${UWSGI_VERSION}; \
    mv /usr/src/wpj.ini buildconf/wpj.ini; \
    # uwsgi tries to find libphp8
    ln -s libphp.so /usr/local/lib/libphp8.so; \
    # Remove '-pie' from ldflags
-   sed -i "s/p_ldflags_blacklist = ('-Wl,--no-undefined',)/p_ldflags_blacklist = ('-Wl,--no-undefined', '-pie')/" uwsgiconfig.py; \
+   sed -i "s/p_ldflags.remove('-Wl,--no-undefined')/p_ldflags.remove('-pie')/" uwsgiconfig.py; \
    UWSGICONFIG_PHPDIR=/usr/local python3 uwsgiconfig.py --build wpj; \
    mkdir /usr/local/uwsgi; \
    mv uwsgi *_plugin.so /usr/local/uwsgi; \
