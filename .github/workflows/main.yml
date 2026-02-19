@@ -43,27 +43,9 @@ jobs:
       - name: Build and push tagged image
         if: ${{ steps.extract_branch.outputs.branch != 'master' }}
         uses: docker/build-push-action@v6
-        id: build
-
-      # Set up Python for docker-squash installation
-      - name: Setup Python
-        uses: actions/setup-python@v5
         with:
-          python-version: '3.x'
-
-      # Install docker-squash
-      - name: Install docker-squash
-        run: pip install docker-squash
-
-      # Squash the local image (overwriting the tag with the newly squashed image)
-      - name: Squash Image Layers
-        run: |
-          docker-squash -t wpjsro/build-base:${{ steps.extract_branch.outputs.branch }}-amd64 ${{ steps.build.outputs.imageid }}
-
-      # Push the finalized, squashed image to Docker Hub
-      - name: Push Squashed Image
-        run: |
-          docker push wpjsro/build-base:${{ steps.extract_branch.outputs.branch }}-amd64 
+          push: true
+          tags: wpjsro/build-base:${{ steps.extract_branch.outputs.branch }}-amd64
 
   build-arm64:
     runs-on: ubuntu-24.04-arm
