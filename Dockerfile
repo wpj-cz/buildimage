@@ -1,7 +1,5 @@
 FROM php:8.4-cli-bookworm AS builder
 
-WORKDIR /var/www/html
-
 ARG TARGETARCH
 
 # use TLSv1.0
@@ -111,7 +109,7 @@ RUN apt-get autoremove --purge -y $PHPIZE_DEPS '.*-dev$' \
 
 FROM scratch
 
-WORKDIR /var/www/html
+WORKDIR /var/www/shop
 
 EXPOSE 80
 
