@@ -38,6 +38,7 @@ jobs:
         with:
           push: true
           tags: wpjsro/build-base:latest-amd64
+          attests: ""
 
       # Build and push image with tag by branch name - if not master branch
       - name: Build and push tagged image
@@ -46,6 +47,7 @@ jobs:
         with:
           push: true
           tags: wpjsro/build-base:${{ steps.extract_branch.outputs.branch }}-amd64
+          attests: ""
 
   build-arm64:
     runs-on: ubuntu-24.04-arm
@@ -72,6 +74,7 @@ jobs:
         with:
           push: true
           tags: wpjsro/build-base:latest-arm64
+          attests: ""
 
       # Build and push image with tag by branch name - if not master branch
       - name: Build and push tagged image
@@ -80,6 +83,7 @@ jobs:
         with:
           push: true
           tags: wpjsro/build-base:${{ steps.extract_branch.outputs.branch }}-arm64
+          attests: ""
 
   merge-images:
     runs-on: ubuntu-latest
