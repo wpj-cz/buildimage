@@ -109,7 +109,7 @@ RUN apt-get autoremove --purge -y $PHPIZE_DEPS '.*-dev$' \
 
 FROM scratch
 
-WORKDIR /var/www/shop
+WORKDIR /var/www
 
 EXPOSE 80
 
