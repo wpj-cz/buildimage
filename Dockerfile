@@ -60,7 +60,7 @@ RUN set -eux; \
 
 RUN apt-get update \
    # Core PHP modules \
-   && apt-get install -y --no-install-recommends libicu72 libicu-dev libxml2 libxml2-dev wget libjpeg62-turbo libjpeg62-turbo-dev libwebp7 libwebp-dev libbz2-1.0 libbz2-dev zlib1g zlib1g-dev libc-client2007e libc-client-dev libmagickwand-6.q16-6 libmagickwand-dev libxslt1.1 libxslt-dev libzip4 libzip-dev mariadb-client \
+   && apt-get install -y --no-install-recommends libicu72 libicu-dev libxml2 libxml2-dev wget libjpeg62-turbo libjpeg62-turbo-dev libwebp7 libwebp-dev libbz2-1.0 libbz2-dev zlib1g zlib1g-dev libc-client2007e libc-client-dev libmagickwand-6.q16-6 libmagickwand-dev libxslt1.1 libxslt-dev libzip4 libzip-dev mariadb-client bzip2 \
    && docker-php-ext-configure gd --with-jpeg=/usr --with-webp=/usr \
    && docker-php-ext-configure ftp --with-ftp-ssl  \
    && docker-php-ext-install pdo_mysql intl mbstring soap bz2 zip bcmath gd xsl calendar opcache gettext sockets ftp \
