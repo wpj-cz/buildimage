@@ -13,9 +13,19 @@ RUN set -eux; \
 
 COPY uwsgi_profile.ini /usr/src/wpj.ini
 
+# install sqlsrv
+RUN apt-get update && apt-get install -y apt-utils apt-transport-https debconf-utils gcc build-essential gnupg \
+       \
+       && curl -s https://packages.microsoft.com/keys/microsoft.asc | apt-key add - \
+       && echo 'deb [arch=amd64,arm64,armhf] https://packages.microsoft.com/debian/12/prod bookworm main' > /etc/apt/sources.list.d/mssql-release.list \
+       \
+       && apt-get update  \
+       && ACCEPT_EULA=Y apt-get install -y unixodbc-dev msodbcsql18 mssql-tools18 \
+       \
+       && pecl install sqlsrv-5.12.0 pdo_sqlsrv-5.12.0 \
+
 # UWSGI
 RUN set -eux; \
-   savedAptMark="$(apt-mark showmanual)"; \
 	apt-get update; \
 	apt-get install -y --no-install-recommends \
 		python3 \
@@ -63,7 +73,7 @@ RUN apt-get update \
    && apt-get install -y --no-install-recommends libicu72 libicu-dev libxml2 libxml2-dev wget libjpeg62-turbo libjpeg62-turbo-dev libwebp7 libwebp-dev libbz2-1.0 libbz2-dev zlib1g zlib1g-dev libc-client2007e libc-client-dev libmagickwand-6.q16-6 libmagickwand-dev libxslt1.1 libxslt-dev libzip4 libzip-dev mariadb-client bzip2 jq \
    && docker-php-ext-configure gd --with-jpeg=/usr --with-webp=/usr \
    && docker-php-ext-configure ftp --with-ftp-ssl  \
-   && docker-php-ext-install pdo_mysql intl mbstring soap bz2 zip bcmath gd xsl calendar opcache gettext sockets ftp \
+   && docker-php-ext-install -j 4 pdo_mysql intl mbstring soap bz2 zip bcmath gd xsl calendar opcache gettext sockets ftp \
    # PECL
    && apt install -y --no-install-recommends libmemcached11 libmemcached-dev librabbitmq4 librabbitmq-dev librdkafka1 librdkafka-dev \
    && pecl install memcached apcu amqp igbinary rdkafka \
@@ -81,7 +91,7 @@ RUN cd /tmp && \
    cd imagick-${IMAGICK_VERSION} && \
    phpize && \
    ./configure && \
-   make && \
+   make -j4 && \
    make install && \
    docker-php-ext-enable imagick
 
@@ -96,13 +106,13 @@ RUN cd /tmp && \
     cd v8js-php8 && \
     phpize     &&  \
     ./configure --with-v8js=/opt/v8 LDFLAGS="-lstdc++" CPPFLAGS="-DV8_COMPRESS_POINTERS "     &&  \
-    make  -j4   &&  \
+    make -j4   &&  \
     make install && \
     echo "extension=v8js.so" > /usr/local/etc/php/conf.d/v8js.ini && \
     rm -rf /tmp/*
 
 # Cleanup
-RUN apt-get autoremove --purge -y $PHPIZE_DEPS '.*-dev$' \
+RUN apt-get autoremove --purge -y $PHPIZE_DEPS '.*-dev$' apt-utils apt-transport-https debconf-utils gcc build-essential gnupg \
     && apt-get -y clean \
     && rm -rf /tmp/* /var/lib/apt/lists/*
 
