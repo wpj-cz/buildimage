@@ -1,4 +1,4 @@
-FROM php:8.4-cli-bookworm AS builder
+FROM php:8.5-cli AS builder
 
 ARG TARGETARCH
 
@@ -14,19 +14,19 @@ RUN set -eux; \
 COPY uwsgi_profile.ini /usr/src/wpj.ini
 
 # install sqlsrv
-RUN apt-get update && apt-get install -y apt-utils apt-transport-https debconf-utils gcc build-essential gnupg \
-       \
-       && curl -s https://packages.microsoft.com/keys/microsoft.asc | apt-key add - \
-       && echo 'deb [arch=amd64,arm64,armhf] https://packages.microsoft.com/debian/12/prod bookworm main' > /etc/apt/sources.list.d/mssql-release.list \
-       \
-       && apt-get update  \
-       && ACCEPT_EULA=Y apt-get install -y unixodbc-dev msodbcsql18 mssql-tools18 \
-       \
-       && pecl install sqlsrv-5.12.0 pdo_sqlsrv-5.12.0 \
+RUN set -eux; \
+    apt-get update; \
+    apt-get install -y apt-utils apt-transport-https debconf-utils gcc build-essential gnupg curl;
+
+RUN set -eux; \
+    curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor -o /usr/share/keyrings/microsoft-prod.gpg; \
+    echo 'deb [arch=amd64,arm64,armhf signed-by=/usr/share/keyrings/microsoft-prod.gpg] https://packages.microsoft.com/debian/12/prod bookworm main' > /etc/apt/sources.list.d/mssql-release.list; \
+    apt-get update; \
+    ACCEPT_EULA=Y apt-get install -y unixodbc-dev msodbcsql18 mssql-tools18; \
+    pecl install sqlsrv-5.13.0 pdo_sqlsrv-5.13.0;
 
 # UWSGI
 RUN set -eux; \
-	apt-get update; \
 	apt-get install -y --no-install-recommends \
 		python3 \
 		libargon2-1 \
@@ -52,7 +52,7 @@ RUN set -eux; \
       libonig5 \
       libonig-dev \
     ;\
-   export UWSGI_VERSION=2.0.30; \
+   export UWSGI_VERSION=2.0.31; \
    cd /usr/src; \
    curl -fsSL -o uwsgi.tar.gz https://github.com/unbit/uwsgi/archive/refs/tags/${UWSGI_VERSION}.tar.gz; \
    tar -xvzf uwsgi.tar.gz; \
@@ -68,25 +68,29 @@ RUN set -eux; \
    rm -rf /usr/src/uwsgi-${UWSGI_VERSION}; \
    cd /usr/src;
 
-RUN apt-get update \
-   # Core PHP modules \
-   && apt-get install -y --no-install-recommends libicu72 libicu-dev libxml2 libxml2-dev wget libjpeg62-turbo libjpeg62-turbo-dev libwebp7 libwebp-dev libbz2-1.0 libbz2-dev zlib1g zlib1g-dev libc-client2007e libc-client-dev libmagickcore-6.q16-6-extra libmagickwand-6.q16-6 libmagickwand-dev libxslt1.1 libxslt-dev libzip4 libzip-dev mariadb-client bzip2 jq \
+# Core PHP modules
+RUN set -ex; \
+   apt-get install -y --no-install-recommends libicu76 libicu-dev libxml2 libxml2-dev wget libjpeg62-turbo libjpeg62-turbo-dev libwebp7 libwebp-dev libbz2-1.0 libbz2-dev zlib1g zlib1g-dev libmagickcore-7.q16-10-extra libmagickwand-7.q16-10 libmagickwand-dev libxslt1.1 libxslt-dev libzip5 libzip-dev mariadb-client bzip2 jq \
    && docker-php-ext-configure gd --with-jpeg=/usr --with-webp=/usr \
    && docker-php-ext-configure ftp --with-ftp-ssl  \
-   && docker-php-ext-install -j 4 pdo_mysql intl mbstring soap bz2 zip bcmath gd xsl calendar opcache gettext sockets ftp \
-   # PECL
-   && apt install -y --no-install-recommends libmemcached11 libmemcached-dev librabbitmq4 librabbitmq-dev librdkafka1 librdkafka-dev \
+   && docker-php-ext-install -j 4 pdo_mysql intl mbstring soap bz2 zip bcmath gd xsl calendar gettext sockets ftp
+
+# PECL
+RUN set -ex; \
+   apt install -y --no-install-recommends libmemcached11 libmemcached-dev librabbitmq4 librabbitmq-dev librdkafka1 librdkafka-dev \
    && pecl install memcached apcu amqp igbinary rdkafka \
    && pecl install --configureoptions 'enable-redis-igbinary="yes"' redis \
-   && docker-php-ext-enable igbinary memcached apcu amqp sockets redis \
-   # Additional apps
-   && apt-get install -y --no-install-recommends nano procps iputils-ping ghostscript less unzip python3-pip \
+   && docker-php-ext-enable igbinary memcached apcu amqp sockets redis
+
+# Additional apps
+RUN set -ex; \
+   apt-get install -y --no-install-recommends nano procps iputils-ping ghostscript less unzip python3-pip \
    # Install xlsx-streaming python library
    && pip install --break-system-packages xlsx-streaming json-stream
 
 RUN cd /tmp && \
-   export IMAGICK_VERSION=3.7.0 && \
-   wget -O imagick.tar.gz https://github.com/Imagick/imagick/archive/refs/heads/${IMAGICK_VERSION}.tar.gz && \
+   export IMAGICK_VERSION=3.8.1 && \
+   wget -O imagick.tar.gz https://github.com/Imagick/imagick/archive/refs/tags/${IMAGICK_VERSION}.tar.gz && \
    tar xvzf imagick.tar.gz && \
    cd imagick-${IMAGICK_VERSION} && \
    phpize && \
@@ -95,7 +99,7 @@ RUN cd /tmp && \
    make install && \
    docker-php-ext-enable imagick
 
-COPY imagick.xml /etc/ImageMagick-6/policy.xml
+COPY imagick.xml /etc/ImageMagick-7/policy.xml
 
 ## V8 runtime
 COPY --from=lukastrkan/libv8:10.7.193 /opt/libv8 /opt/v8/
