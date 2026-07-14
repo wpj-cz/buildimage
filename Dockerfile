@@ -16,7 +16,7 @@ COPY uwsgi_profile.ini /usr/src/wpj.ini
 # install sqlsrv
 RUN set -eux; \
     apt-get update; \
-    apt-get install -y apt-utils apt-transport-https debconf-utils gcc build-essential gnupg curl;
+    apt-get install -y apt-utils apt-transport-https debconf-utils gcc build-essential gnupg curl pkg-config libtool;
 
 RUN set -eux; \
     curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor -o /usr/share/keyrings/microsoft-prod.gpg; \
@@ -75,12 +75,20 @@ RUN set -ex; \
    && docker-php-ext-configure ftp --with-ftp-ssl  \
    && docker-php-ext-install -j 4 pdo_mysql intl mbstring soap bz2 zip bcmath gd xsl calendar gettext sockets ftp
 
-# PECL
+# PIE
+RUN set -ex; \
+   curl -fL -o /usr/local/bin/pie https://github.com/php/pie/releases/latest/download/pie.phar \
+   && chmod +x /usr/local/bin/pie;
+
 RUN set -ex; \
    apt install -y --no-install-recommends libmemcached11 libmemcached-dev librabbitmq4 librabbitmq-dev librdkafka1 librdkafka-dev \
-   && pecl install memcached apcu amqp igbinary rdkafka \
-   && pecl install --configureoptions 'enable-redis-igbinary="yes"' redis \
-   && docker-php-ext-enable igbinary memcached apcu amqp sockets redis
+   && pie install -n igbinary/igbinary:3.2.17RC1 \
+   && pie install -n php-memcached/php-memcached --enable-memcached-igbinary \
+   && pie install -n apcu/apcu \
+   && pie install -n php-amqp/php-amqp \
+   && pie install -n rdkafka/rdkafka \
+   && pie install -n phpredis/phpredis --enable-redis-igbinary \
+   && docker-php-ext-enable sockets
 
 # Additional apps
 RUN set -ex; \
