@@ -1,4 +1,4 @@
-FROM php:8.5-cli AS builder
+FROM php:8-cli AS builder
 
 ARG TARGETARCH
 
